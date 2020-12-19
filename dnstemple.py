@@ -6,9 +6,33 @@
 
 import ipaddress
 import sys
+import time
 
-#import dns
+import dns.resolver
+import dns.rdatatype
+import dns.exception
 import yaml
+
+
+def soa_serial_for_today():
+    soa = time.strftime("%Y%m%d00", time.gmtime())
+    return int(soa)
+
+
+def get_serial(domain):
+    soa = soa_serial_for_today()
+    try:
+        answers = dns.resolver.resolve(domain, dns.rdatatype.SOA,
+                raise_on_no_answer=False, search=False)
+        if answers[0].serial > soa:
+            soa = answers[0].serial
+            # Try to get from origin
+            # XXX TODO
+            return soa+1 # Next
+    except dns.exception.DNSException as e:
+        print(f"WARNING: Could not obtain current SOA serial ({e}), falling back to {soa}")
+        return soa
+
 
 def expand_variables(filename, line, config):
     try:
@@ -48,7 +72,7 @@ def process(filename, config):
     output = []
     with open(filename, 'r') as f:
         for line in f.readlines():
-            line = line.strip()
+            line = line.rstrip()
             line = expand_variables(filename, line, config)
             if line.startswith('$ADDRESS'):
                 output += expand_address(filename, line, config)
@@ -61,7 +85,9 @@ def process(filename, config):
 
 def load_config(filename):
     with open(filename) as cfg:
-        return yaml.safe_load(cfg)
+        config = yaml.safe_load(cfg)
+        config['variables']['_config'] = filename
+        return config
 
 
 def main(args):
@@ -72,8 +98,26 @@ def main(args):
         config = load_config('dnstemple.yaml')
     if len(args) == 0:
         exit("No zone file provided")
+    if ('extensions' not in config or 'in' not in config['extensions']
+            or 'out' not in config['extensions']):
+        exit("extensions.in and extensions.out required in config file")
+    extin = config['extensions']['in']
+    extout = config['extensions']['out']
+    if extin == extout:
+        exit("extensions.in and extensions.out need to differ")
     for filename in args:
-        print('\n'.join(process(filename, config)))
+        # Remove extension, if possible
+        if (filename.endswith(extin)):
+            domain = filename[:-len(extin)]
+        else:
+            domain = filename
+        # As these values will be overwritten every time,
+        # they can share/reuse the same dict
+        config['variables']['_domain'] = domain
+        config['variables']['_serial'] = get_serial(domain)
+        print(config['variables'])
+        with open(domain + extout, 'w') as file:
+            file.write('\n'.join(process(filename, config)) + '\n')
 
 
 if __name__ == '__main__':
