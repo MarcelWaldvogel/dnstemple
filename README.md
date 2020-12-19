@@ -133,8 +133,8 @@ _dmarc		TXT	"v=DMARC1; p=none; rua=mailto:dkim@example.com; fo=1:d:s"
 
 - `web.t`:
 ```bind
-$ADDRESS	@	web
-$ADDRESS	www	web
+$ADDRESS	web	@
+$ADDRESS	web	www
 ```
 
 - `common.t`:
