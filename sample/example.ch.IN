@@ -1,0 +1,5 @@
+$INCLUDE	common.t	zone=example.ch. serial=123
+$ADDRESS	ns1	ns1
+$ADDRESS	ns2	ns2
+$ADDRESS	cloud	cloud
+@		TXT	"google-site-verification=isei8oox1gahc7oox1ezith9eith2ki8aigh9aiD"
