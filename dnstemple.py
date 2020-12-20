@@ -115,7 +115,6 @@ def main(args):
         # they can share/reuse the same dict
         config['variables']['_domain'] = domain
         config['variables']['_serial'] = get_serial(domain)
-        print(config['variables'])
         with open(domain + extout, 'w') as file:
             file.write('\n'.join(process(filename, config)) + '\n')
 
