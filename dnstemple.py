@@ -71,16 +71,28 @@ def expand_include(filename, line, config):
 
 def process(filename, config):
     output = []
+    expect_name = True
     with open(filename, 'r') as f:
         for line in f.readlines():
             line = line.rstrip()
             line = expand_variables(filename, line, config)
             if line.startswith('$ADDRESS'):
                 output += expand_address(filename, line, config)
+                expect_name = True
             elif line.startswith('$INCLUDE'):
                 output += expand_include(filename, line, config)
-            else:
+                expect_name = True
+            elif line.startswith('$'):
                 output.append(line)
+                expect_name = True
+            elif line == '':
+                # Do not warn and keep expectations
+                output.append(line)
+            else:
+                if expect_name and line[0] in ' \t':
+                    print(f"WARNING: Line may have undefined name in {filename}: {line}")
+                output.append(line)
+                expect_name = False
     return output
 
 
