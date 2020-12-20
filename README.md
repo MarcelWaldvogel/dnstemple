@@ -161,3 +161,71 @@ $ADDRESS	ns2	ns2
 $ADDRESS	cloud	cloud
 @		TXT	"google-site-verification=isei8oox1gahc7oox1ezith9eith2ki8aigh9aiD"
 ```
+
+# Syntax
+
+The BIND syntax is augmented as follows:
+
+## Configuration file
+
+The configuration file is structured as follows:
+```yaml
+extensions:
+  in: <extension on input file names>
+  out: <extension for output file names>
+addresses:
+  <name1>: <addresses1…>
+  <name2>: <addresses2…>
+  ...
+variables:
+  <name1>: <value1>
+  <name2>: <value2>
+  ...
+```
+
+The `in` extension is removed from the input file names, if present, and the
+`out` extension is appended. The basename is also used to set the `_domain`
+variable, below.
+
+## Variables
+
+Variable names in curly brackets (`{}`) are expanded directly when reading the
+line from the input file (the entire Python `format()` specification is
+supported). Only after that, lines are parsed; i.e., whitespace or quotes have
+no special significance to `dnstemple` and cannot be escaped (at least as of
+now).
+
+The following special variables are automatically set:
+
+* `_config`: The file name the YAML configuration has been read from.
+* `_domain`: The domain name, as determined by the basename of the top-level
+  file, i.e., the file specified on the command line, after removing the `in`
+  extension.
+* `_serial`: A serial number usable for the `SOA` record. For this, existing
+  `SOA` serials are obtained by querying the local resolver and an
+  authoritative name server. Highest priority for authoritative name server is
+  given to the *master name* (`MNAME`) extracted from the `SOA` record returned
+  by the local resolver, with the remaining `NS` entries as fallbacks. The
+  minimum SOA corresponds to what `date -u +%Y%m%d00` would return.
+
+All variable names starting with `_` are reserved.
+
+## Directives
+
+### `$INCLUDE <file> [<var>=<value>…]`
+
+Include the given file. The set of variables available to the included file is
+the set of variables available to the parent, plus the variables passed as
+parameters. This is similar to how parameters would be passed to functions.
+
+Separation is done at all whitespace, after variable substitution, without
+consideration of quotes or escape characters. So do not try to include
+whitespace into variable values.
+
+### `$ADDRESS <address> <prefix>`
+
+Create one line for each of the addresses listed for the named address
+parameter specified in the configuration file. Both IPv4 and IPv6 addresses can
+be mixed arbitrarily and will be prefixed with `A` or `AAAA`, as appropriate.
+Typically, the prefix will just be a name, but can also contain TTL
+information; in fact, anything that could precede the `A` or `AAAA`.
