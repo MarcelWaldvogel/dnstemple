@@ -48,10 +48,11 @@ def expand_address(filename, line, config):
     output = []
     for a in addresses.split():
         ipa = ipaddress.ip_address(a)
+        doubletab = '\t' if len(prefix) < 8 else ''
         if isinstance(ipa, ipaddress.IPv4Address):
-            output.append(f'{prefix}\tA\t{a}')
+            output.append(f'{prefix}{doubletab}\tA\t{a}')
         else:
-            output.append(f'{prefix}\tAAAA\t{a}')
+            output.append(f'{prefix}{doubletab}\tAAAA\t{a}')
     return output
 
 
