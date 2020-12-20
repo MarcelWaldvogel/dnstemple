@@ -19,19 +19,49 @@ def soa_serial_for_today():
     return int(soa)
 
 
-def get_serial(domain):
-    soa = soa_serial_for_today()
+def maybe_addr(addresses, domain, qtype):
     try:
-        answers = dns.resolver.resolve(domain, dns.rdatatype.SOA,
-                raise_on_no_answer=False, search=False)
+        answer = dns.resolver.resolve(domain, qtype, search=False)
+        addresses.append(answer[0].address)
+    except dns.exception.DNSException:
+        pass
+    return addresses
+
+
+def resolver_for(domain, mname):
+    """Return a resolver object whose nameservers are obtained by
+    asking the SOA MNAME (master name) for its addresses and listing
+    the remaining NS addresses after that. Master is assumed to be
+    most up-to-date, but may not always be reachable."""
+    addresses = []
+    maybe_addr(addresses, mname, 'AAAA')
+    maybe_addr(addresses, mname, 'A')
+    answer = dns.resolver.resolve(domain, 'NS', search=False)
+    for ns in answer:
+        maybe_addr(addresses, ns.target, 'AAAA')
+        maybe_addr(addresses, ns.target, 'A')
+    if len(addresses) == 0:
+        exit("No NS addresses found for {domain}, {mname}")
+    res = dns.resolver.Resolver(configure=False)
+    res.nameservers = addresses
+    return res
+
+
+def get_serial(domain):
+    soa = soa_serial_for_today()-1
+    try:
+        answers = dns.resolver.resolve(domain, 'SOA', search=False)
         if answers[0].serial > soa:
             soa = answers[0].serial
-            # Try to get from origin
-            # XXX TODO
-            return soa+1 # Next
+        # Try to get from origin
+        res = resolver_for(domain, answers[0].mname)
+        answers = res.resolve(domain, 'SOA', search=False)
+        if answers[0].serial > soa:
+            soa = answers[0].serial
+        return soa+1 # Next
     except dns.exception.DNSException as e:
         print(f"WARNING: Could not obtain current SOA serial ({e}), falling back to {soa}")
-        return soa
+        return soa+1
 
 
 def expand_variables(filename, line, config):
