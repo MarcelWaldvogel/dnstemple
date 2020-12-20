@@ -1,4 +1,4 @@
-$INCLUDE	common.t	zone=example.ch. serial=123
+$INCLUDE	common.t
 $ADDRESS	ns1	ns1
 $ADDRESS	ns2	ns2
 $ADDRESS	cloud	cloud
