@@ -133,7 +133,7 @@ def load_config(filename):
         return config
 
 
-def main(args):
+def process_files(args):
     if len(args) > 1 and args[0] == '-c':
         config = load_config(args[1])
         args = args[2:]
@@ -162,5 +162,9 @@ def main(args):
             file.write('\n'.join(process(filename, config)) + '\n')
 
 
+def main():
+    process_files(sys.argv[1:])
+
+
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()
