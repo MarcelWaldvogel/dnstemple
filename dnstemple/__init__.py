@@ -71,6 +71,13 @@ def expand_variables(filename, line, config):
         exit(f"Unknown variable {k} in {filename}: {line}")
 
 
+def expand_default(filename, line, config):
+    (token, var, default) = line.split(maxsplit=2)
+    if var not in config['variables'] or config['variables'][var] != '':
+        config['variables'][var] = default
+    return ''
+
+
 def expand_address(filename, line, config):
     (token, addr, prefix) = line.split(maxsplit=2)
     # KeyError caught in caller
@@ -111,6 +118,9 @@ def process(filename, config):
                 expect_name = True
             elif line.startswith('$INCLUDE'):
                 output += expand_include(filename, line, config)
+                expect_name = True
+            elif line.startswith('$DEFAULT'):
+                output += expand_default(filename, line, config)
                 expect_name = True
             elif line.startswith('$'):
                 output.append(line)

@@ -105,13 +105,15 @@ variables:
 ```
 
 Create a set of templates using `{variable}` references, `$ADDRESS` explosions
-(expanding dynamically to a set of `A` and `AAAA` records), and `$INCLUDE`s:
+(expanding dynamically to a set of `A` and `AAAA` records), `$INCLUDE`s, and
+`$DEFAULT` values for some variables using magic `{_domain}` and `{_serial}`
+variables:
 
 - `header.t`:
 ```bind
-$ORIGIN		{zone}
+$ORIGIN		{_domain}
 $TTL		86400
-@		SOA	(ns1.example.com. hostmaster.example.com. {serial} 3600 1800 2419200 300)
+@		SOA	(ns1.example.com. hostmaster.example.com. {_serial} 3600 1800 2419200 300)
 		NS	ns1.example.com.
 		NS	ns2.example.com.
 		CAA	0 issue "{ca}"
@@ -119,16 +121,17 @@ $TTL		86400
 
 - `mail.t`:
 ```bind
-$ADDRESS	mail	mail
+$DEFAULT			domain	{_domain}.
+$ADDRESS			mail	mail
 
-@		MX	10 mail.example.com.
-		TXT	"v=spf1 mx ~all"
-autodiscover	CNAME	mail
-autoconfig	CNAME	mail
-smtp		CNAME	mail
-imap		CNAME	mail
-dkim._domainkey	TXT	"v=DKIM1;k=rsa;t=s;s=email;p={dkimkey}"
-_dmarc		TXT	"v=DMARC1; p=none; rua=mailto:dkim@example.com; fo=1:d:s"
+{domain}			MX	10 mail.example.com.
+				TXT	"v=spf1 mx ~all"
+autodiscover.{domain}		CNAME	mail
+autoconfig.{domain}		CNAME	mail
+smtp.{domain}			CNAME	mail
+imap.{domain}			CNAME	mail
+dkim._domainkey.{domain}	TXT	"v=DKIM1;k=rsa;t=s;s=email;p={dkimkey}"
+_dmarc.{domain}			TXT	"v=DMARC1; p=none; rua=mailto:dkim@example.com; fo=1:d:s"
 ```
 
 - `web.t`:
@@ -139,7 +142,7 @@ $ADDRESS	web	www
 
 - `common.t`:
 ```bind
-$INCLUDE	header.t	zone={zone}
+$INCLUDE	header.t
 $INCLUDE	mail.t
 $INCLUDE	web.t
 ```
@@ -147,7 +150,8 @@ $INCLUDE	web.t
 These configuration templates will be shared among the zones, resulting in much more compact files:
 
 ```bind
-$INCLUDE	common.t	zone=example.com.
+$INCLUDE	common.t
+$INCLUDE	mail.t	domain=noreply
 $ADDRESS	ns1	ns1
 $ADDRESS	ns2	ns2
 $ADDRESS	cloud	cloud
@@ -155,7 +159,7 @@ $ADDRESS	cloud	cloud
 ```
 
 ```bind
-$INCLUDE	common.t	zone=example.ch.
+$INCLUDE	common.t
 $ADDRESS	ns1	ns1
 $ADDRESS	ns2	ns2
 $ADDRESS	cloud	cloud
@@ -229,3 +233,7 @@ parameter specified in the configuration file. Both IPv4 and IPv6 addresses can
 be mixed arbitrarily and will be prefixed with `A` or `AAAA`, as appropriate.
 Typically, the prefix will just be a name, but can also contain TTL
 information; in fact, anything that could precede the `A` or `AAAA`.
+
+### `$DEFAULT <variable> <value>`
+
+If the specified variable is undefined or empty, set it to the value given.
