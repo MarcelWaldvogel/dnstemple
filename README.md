@@ -101,7 +101,8 @@ addresses:
 	cloud:	192.0.2.90	2001:db8:1234:5678::90
 variables:
 	ca:	letsencrypt.org
-	dkimkey: MII...
+	dkimkey: |
+		"MII..."
 ```
 
 Create a set of templates using `{variable}` references, `$ADDRESS` explosions
