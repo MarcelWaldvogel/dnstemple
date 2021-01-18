@@ -175,6 +175,8 @@ The BIND syntax is augmented as follows:
 
 The configuration file is structured as follows:
 ```yaml
+config:
+  serial: <increment|date|unixtime>
 extensions:
   in: <extension on input file names>
   out: <extension for output file names>
@@ -191,6 +193,12 @@ variables:
 The `in` extension is removed from the input file names, if present, and the
 `out` extension is appended. The basename is also used to set the `_domain`
 variable, below.
+
+Serial number modes are as follows:
+- `online` (default): Queries the name servers and increments; but uses at
+  least the value that `dateserial` would produce
+- `dateserial`: Uses the `YYYYMMDD00` format
+- `unixtime`: Uses the current second since start of the epoch
 
 ## Variables
 

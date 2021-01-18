@@ -19,6 +19,10 @@ def soa_serial_for_today():
     return int(soa)
 
 
+def soa_serial_for_now():
+    return int(time.time())
+
+
 def maybe_addr(addresses, domain, qtype):
     try:
         answer = dns.resolver.resolve(domain, qtype, search=False)
@@ -47,21 +51,29 @@ def resolver_for(domain, mname):
     return res
 
 
-def get_serial(domain):
-    soa = soa_serial_for_today()-1
-    try:
-        answers = dns.resolver.resolve(domain, 'SOA', search=False)
-        if answers[0].serial > soa:
-            soa = answers[0].serial
-        # Try to get from origin
-        res = resolver_for(domain, answers[0].mname)
-        answers = res.resolve(domain, 'SOA', search=False)
-        if answers[0].serial > soa:
-            soa = answers[0].serial
-        return soa+1 # Next
-    except dns.exception.DNSException as e:
-        print(f"WARNING: Could not obtain current SOA serial ({e}), falling back to {soa}")
+def get_serial(domain, mode):
+    if mode == 'unixtime':
+        return soa_serial_for_now()
+    elif mode == 'dateserial':
+        return soa_serial_for_today()
+    elif mode is None or mode == 'online':
+        soa = soa_serial_for_today()-1
+        try:
+            answers = dns.resolver.resolve(domain, 'SOA', search=False)
+            if answers[0].serial > soa:
+                soa = answers[0].serial
+            # Try to get from origin
+            res = resolver_for(domain, answers[0].mname)
+            answers = res.resolve(domain, 'SOA', search=False)
+            if answers[0].serial > soa:
+                soa = answers[0].serial
+            return soa+1 # Next
+        except dns.exception.DNSException as e:
+            print(f"""WARNING: Could not obtain current SOA serial for {domain}
+({e}), falling back to {soa+1}""")
         return soa+1
+    else:
+        exit(f"Unknown value for config.serial: {mode}")
 
 
 def expand_variables(filename, line, config):
@@ -167,7 +179,11 @@ def process_files(args):
         # As these values will be overwritten every time,
         # they can share/reuse the same dict
         config['variables']['_domain'] = domain
-        config['variables']['_serial'] = get_serial(domain)
+        try:
+            serial_mode = config['config']['serial']
+        except KeyError:
+            serial_mode = None
+        config['variables']['_serial'] = get_serial(domain, serial_mode)
         with open(domain + extout, 'w') as file:
             file.write('\n'.join(process(filename, config)) + '\n')
 
