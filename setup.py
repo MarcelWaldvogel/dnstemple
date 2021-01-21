@@ -49,7 +49,7 @@ setuptools.setup(
     url="https://gitlab.com/MarcelWaldvogel/dnstemple",
     license='MIT',
     packages=setuptools.find_packages(),
-    install_requires=[],
+    install_requires=['dnspython'],
     python_requires='>=3.5',
     entry_points={
         'console_scripts': [

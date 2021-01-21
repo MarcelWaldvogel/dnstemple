@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   discarded, as it would have required a variable substitution parser.)
 
 ## Fixed
+- Install `dnspython` as well when using `pip`.
 
 ## Changed
 
