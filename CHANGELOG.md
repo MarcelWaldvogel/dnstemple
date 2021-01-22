@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Comment lines no longer reset the expectation for a label (to avoid wrong
   assumptions, after e.g. `$INCLUDE`, a warning is issued, if the first
   resource record does not have an explicit label)
+- Warnings go to stderr so that only changed domain names go to stdout
 
 
 # 0.2.0 - 2021-01-21

@@ -70,8 +70,8 @@ def get_serial(domain, mode):
                 soa = answers[0].serial
             return soa + 1  # Next
         except dns.exception.DNSException as e:
-            print(f"""WARNING: Could not obtain current SOA serial for {domain}
-({e}), falling back to {soa + 1}""")
+            sys.stderr.write(f"""WARNING: Could not obtain current SOA serial for {domain}
+({e}), falling back to {soa + 1}\n""")
         return soa + 1
     else:
         # An integer constant?
@@ -153,7 +153,8 @@ def process(filename, config):
                     output.append(line)
             else:
                 if expect_name and line[0] in ' \t':
-                    print(f"WARNING: Line may have undefined name in {filename}: {line}")
+                    sys.stderr.write(f"WARNING: Line may have undefined name"
+                        " in {filename}: {line}\n")
                 output.append(line)
                 expect_name = False
     return output
