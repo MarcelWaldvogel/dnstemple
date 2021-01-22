@@ -129,7 +129,8 @@ def process(filename, config):
     with open(filename, 'r') as f:
         for line in f.readlines():
             line = line.rstrip()
-            line = expand_variables(filename, line, config)
+            if not line.startswith(';'):
+                line = expand_variables(filename, line, config)
             if line.startswith('$ADDRESS'):
                 output += expand_address(filename, line, config)
                 expect_name = True

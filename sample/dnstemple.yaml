@@ -1,6 +1,6 @@
 config:
     serial:    1
-    skip:      empty,comment
+    #    skip:      empty,comment
 
 catalog:
     maintain:  multiple-files
