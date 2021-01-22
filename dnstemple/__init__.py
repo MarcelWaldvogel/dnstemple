@@ -9,9 +9,9 @@ import sys
 import time
 import uuid
 
-import dns.resolver
-import dns.rdatatype
 import dns.exception
+import dns.rdatatype
+import dns.resolver
 import yaml
 
 
@@ -58,7 +58,7 @@ def get_serial(domain, mode):
     elif mode == 'dateserial':
         return soa_serial_for_today()
     elif mode == 'online':
-        soa = soa_serial_for_today()-1
+        soa = soa_serial_for_today() - 1
         try:
             answers = dns.resolver.resolve(domain, 'SOA', search=False)
             if answers[0].serial > soa:
@@ -68,11 +68,11 @@ def get_serial(domain, mode):
             answers = res.resolve(domain, 'SOA', search=False)
             if answers[0].serial > soa:
                 soa = answers[0].serial
-            return soa+1 # Next
+            return soa + 1  # Next
         except dns.exception.DNSException as e:
             print(f"""WARNING: Could not obtain current SOA serial for {domain}
-({e}), falling back to {soa+1}""")
-        return soa+1
+({e}), falling back to {soa + 1}""")
+        return soa + 1
     else:
         # An integer constant?
         try:
@@ -247,10 +247,10 @@ def update_catalog(config, domains):
     except FileNotFoundError:
         # Use a default context with NS for backward compatibility
         lines = [
-                f'@\t0\tSOA\tns.{domain}. hostmaster.{domain}. 1 1h 30m 1w 5m\n'
-                f'\t0\tNS\tns.{domain}.\n'
-                'version\t0\tTXT\t"2"\n'
-                ]
+            f'@\t0\tSOA\tns.{domain}. hostmaster.{domain}. 1 1h 30m 1w 5m\n'
+            f'\t0\tNS\tns.{domain}.\n'
+            'version\t0\tTXT\t"2"\n'
+        ]
 
     # Not yet in catalog, add
     for d in domains - ptrs:
@@ -271,7 +271,7 @@ def main():
     domains = process_files(config, args)
     if 'catalog' in config:
         if len(domains) > 1 or ('maintain' in config['catalog']
-                and config['catalog']['maintain']):
+                                and config['catalog']['maintain']):
             update_catalog(config, domains)
 
 
