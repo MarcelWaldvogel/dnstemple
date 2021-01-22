@@ -156,6 +156,21 @@ def load_config(filename):
         return config
 
 
+def write_if_changed(filename, contents):
+    # Ignore changes in the first line only (the SOA record)
+    try:
+        with open(filename, 'r') as file:
+            old_contents = file.read()
+    except FileNotFoundError:
+        old_contents = None
+    if old_contents != contents:
+        with open(filename, 'w') as file:
+            file.write(contents)
+        return True
+    else:
+        return False
+
+
 def process_files(config, args):
     if len(args) == 0:
         exit("No zone file provided")
@@ -183,8 +198,8 @@ def process_files(config, args):
         except KeyError:
             serial_mode = None
         config['variables']['_serial'] = get_serial(domain, serial_mode)
-        with open(domain + extout, 'w') as file:
-            file.write('\n'.join(process(filename, config)) + '\n')
+        if write_if_changed(domain + extout, '\n'.join(process(filename, config)) + '\n'):
+            print(domain)
     return domains
 
 

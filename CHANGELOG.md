@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## Added
 - Automatically maintain a catalog file
 - `./dnstemple.py` to simplify testing the current version
+- Will output the domains which were changed, to simplify zone reloads
 
 ## Fixed
 
