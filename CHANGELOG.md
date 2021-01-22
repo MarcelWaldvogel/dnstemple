@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## Fixed
 
 ## Changed
+- Default for serial number generation is now `unixtime`. Is much faster
+  than `online`. Recommended for use with [Knot DNS](https://knot-dns.cz)
+  option `zonefile-load: difference-no-serial`.
 
 
 # 0.2.0 - 2021-01-21

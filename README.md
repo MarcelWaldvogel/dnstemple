@@ -195,10 +195,15 @@ The `in` extension is removed from the input file names, if present, and the
 variable, below.
 
 Serial number modes are as follows:
-- `online` (default): Queries the name servers and increments; but uses at
-  least the value that `dateserial` would produce
+- `online`: Queries the name servers and increments; but uses at
+  least the value that `dateserial` would produce. For this, existing
+  `SOA` serials are obtained by querying the local resolver and an
+  authoritative name server. Highest priority for authoritative name server is
+  given to the *master name* (`MNAME`) extracted from the `SOA` record returned
+  by the local resolver, with the remaining `NS` entries as fallbacks. The
+  minimum SOA corresponds to what `date -u +%Y%m%d00` would return.
 - `dateserial`: Uses the `YYYYMMDD00` format
-- `unixtime`: Uses the current second since start of the epoch
+- `unixtime` (default): Uses the current second since start of the epoch
 
 ## Variables
 
@@ -214,12 +219,7 @@ The following special variables are automatically set:
 * `_domain`: The domain name, as determined by the basename of the top-level
   file, i.e., the file specified on the command line, after removing the `in`
   extension.
-* `_serial`: A serial number usable for the `SOA` record. For this, existing
-  `SOA` serials are obtained by querying the local resolver and an
-  authoritative name server. Highest priority for authoritative name server is
-  given to the *master name* (`MNAME`) extracted from the `SOA` record returned
-  by the local resolver, with the remaining `NS` entries as fallbacks. The
-  minimum SOA corresponds to what `date -u +%Y%m%d00` would return.
+* `_serial`: A serial number usable for the `SOA` record.
 
 All variable names starting with `_` are reserved.
 

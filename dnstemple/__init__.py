@@ -53,11 +53,11 @@ def resolver_for(domain, mname):
 
 
 def get_serial(domain, mode):
-    if mode == 'unixtime':
+    if mode is None or mode == 'unixtime':
         return soa_serial_for_now()
     elif mode == 'dateserial':
         return soa_serial_for_today()
-    elif mode is None or mode == 'online':
+    elif mode == 'online':
         soa = soa_serial_for_today()-1
         try:
             answers = dns.resolver.resolve(domain, 'SOA', search=False)
