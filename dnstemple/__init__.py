@@ -199,6 +199,7 @@ def process_files(config, args):
         config['config']['skip'] = ''
 
     domains = set()
+    mod_domains = set()
     for filename in args:
         # Remove extension, if possible
         if (filename.endswith(extin)):
@@ -215,8 +216,8 @@ def process_files(config, args):
             serial_mode = None
         config['variables']['_serial'] = get_serial(domain, serial_mode)
         if write_if_changed(domain + extout, '\n'.join(process(filename, config)) + '\n'):
-            print(domain)
-    return domains
+            mod_domains.add(domain)
+    return (domains, mod_domains)
 
 
 def update_catalog(config, domains):
@@ -225,6 +226,7 @@ def update_catalog(config, domains):
     if 'catalog' not in config['extensions']:
         exit("catalog requires extensions.catalog")
 
+    changed = False
     domain = config['catalog']['domain']
     ext = config['extensions']['catalog']
     fn = domain + ext
@@ -242,7 +244,7 @@ def update_catalog(config, domains):
                         ptrs.add(parts[-1][:-1])
                     else:
                         # In existing catalog, remove
-                        pass
+                        changed = True
                 else:
                     lines.append(line)
     except FileNotFoundError:
@@ -252,14 +254,18 @@ def update_catalog(config, domains):
             f'\t0\tNS\tns.{domain}.\n'
             'version\t0\tTXT\t"2"\n'
         ]
+        changed = True
 
     # Not yet in catalog, add
     for d in domains - ptrs:
         u = str(uuid.uuid4())
         lines.append(f'{u}.zones\t0\tPTR\t{d}.\n')
+        changed = True
 
-    with open(fn, 'w') as f:
-        f.write(''.join(lines))
+    if changed:
+        with open(fn, 'w') as f:
+            f.write(''.join(lines))
+    return changed
 
 
 def main():
@@ -269,11 +275,14 @@ def main():
         args = args[2:]
     else:
         config = load_config('dnstemple.yaml')
-    domains = process_files(config, args)
+    (domains, mod_domains) = process_files(config, args)
     if 'catalog' in config:
         if len(domains) > 1 or ('maintain' in config['catalog']
-                                and config['catalog']['maintain']):
-            update_catalog(config, domains)
+                                and config['catalog']['maintain'] == 'always'):
+            if update_catalog(config, domains):
+                print(config['catalog']['domain'])
+    if len(mod_domains) > 0:
+        print('\n'.join(mod_domains))
 
 
 if __name__ == '__main__':

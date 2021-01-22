@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Will output the domains which were changed, to simplify zone reloads
 - Option to skip outputting empty and/or comment lines (*starting* with `;`)
 - Allow a constant number as the serial number in `config.serial`
+- If catalog is changed, output its name first, so that it the name server
+  will learn about potential new domains first
 
 ## Fixed
 
