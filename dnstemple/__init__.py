@@ -7,6 +7,7 @@
 import ipaddress
 import sys
 import time
+import uuid
 
 import dns.resolver
 import dns.rdatatype
@@ -155,12 +156,7 @@ def load_config(filename):
         return config
 
 
-def process_files(args):
-    if len(args) > 1 and args[0] == '-c':
-        config = load_config(args[1])
-        args = args[2:]
-    else:
-        config = load_config('dnstemple.yaml')
+def process_files(config, args):
     if len(args) == 0:
         exit("No zone file provided")
     if ('extensions' not in config or 'in' not in config['extensions']
@@ -170,12 +166,15 @@ def process_files(args):
     extout = config['extensions']['out']
     if extin == extout:
         exit("extensions.in and extensions.out need to differ")
+
+    domains = set()
     for filename in args:
         # Remove extension, if possible
         if (filename.endswith(extin)):
             domain = filename[:-len(extin)]
         else:
             domain = filename
+        domains.add(domain)
         # As these values will be overwritten every time,
         # they can share/reuse the same dict
         config['variables']['_domain'] = domain
@@ -186,10 +185,64 @@ def process_files(args):
         config['variables']['_serial'] = get_serial(domain, serial_mode)
         with open(domain + extout, 'w') as file:
             file.write('\n'.join(process(filename, config)) + '\n')
+    return domains
+
+
+def update_catalog(config, domains):
+    if 'domain' not in config['catalog']:
+        exit("catalog requires catalog.domain")
+    if 'catalog' not in config['extensions']:
+        exit("catalog requires extensions.catalog")
+
+    domain = config['catalog']['domain']
+    ext = config['extensions']['catalog']
+    fn = domain + ext
+    # Read catalog
+    lines = []
+    ptrs = set()
+    try:
+        with open(fn, 'r') as f:
+            for line in f.readlines():
+                parts = line.strip().split()
+                if len(parts) > 2 and parts[-2].upper() == 'PTR':
+                    if parts[-1][:-1] in domains:
+                        # In existing catalog, keep
+                        lines.append(line)
+                        ptrs.add(parts[-1][:-1])
+                    else:
+                        # In existing catalog, remove
+                        pass
+                else:
+                    lines.append(line)
+    except FileNotFoundError:
+        # Use a default context with NS for backward compatibility
+        lines = [
+                f'@\t0\tSOA\tns.{domain}. hostmaster.{domain}. 1 1h 30m 1w 5m\n'
+                f'\t0\tNS\tns.{domain}.\n'
+                'version\t0\tTXT\t"2"\n'
+                ]
+
+    # Not yet in catalog, add
+    for d in domains - ptrs:
+        u = str(uuid.uuid4())
+        lines.append(f'{u}.zones\t0\tPTR\t{d}.\n')
+
+    with open(fn, 'w') as f:
+        f.write(''.join(lines))
 
 
 def main():
-    process_files(sys.argv[1:])
+    args = sys.argv[1:]
+    if len(args) > 1 and args[0] == '-c':
+        config = load_config(args[1])
+        args = args[2:]
+    else:
+        config = load_config('dnstemple.yaml')
+    domains = process_files(config, args)
+    if 'catalog' in config:
+        if len(domains) > 1 or ('maintain' in config['catalog']
+                and config['catalog']['maintain']):
+            update_catalog(config, domains)
 
 
 if __name__ == '__main__':

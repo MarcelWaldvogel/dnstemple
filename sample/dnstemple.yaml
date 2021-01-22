@@ -1,9 +1,14 @@
 config:
     serial:  unixtime
 
+catalog:
+    maintain: multiple-files
+    domain:  example.catalog
+
 extensions:
     in:      .IN
     out:     .OUT
+    catalog: .zone
 
 addresses:
     ns1:     203.0.113.53   2001:db8:1:2::53

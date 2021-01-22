@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
+# 0.2.0+ - [Unreleased]
+## Added
+- Automatically maintain a catalog file
+
+## Fixed
+
+## Changed
+
+
 # 0.2.0 - 2021-01-21
 ## Added
 - Support for `$DEFAULT` directive for setting a default value for a variable.
