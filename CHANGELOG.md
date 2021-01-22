@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
-# 0.2.0+ - [Unreleased]
+# 0.3.0 - 2021-01-22
 ## Added
 - Automatically maintain a catalog file
 - `./dnstemple.py` to simplify testing the current version
