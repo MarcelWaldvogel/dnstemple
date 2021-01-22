@@ -74,7 +74,11 @@ def get_serial(domain, mode):
 ({e}), falling back to {soa+1}""")
         return soa+1
     else:
-        exit(f"Unknown value for config.serial: {mode}")
+        # An integer constant?
+        try:
+            return int(mode)
+        except ValueError:
+            exit(f"Unknown value for config.serial: {mode}")
 
 
 def expand_variables(filename, line, config):

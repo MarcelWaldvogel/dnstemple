@@ -176,7 +176,7 @@ The BIND syntax is augmented as follows:
 The configuration file is structured as follows:
 ```yaml
 config:
-  serial: <increment|date|unixtime>
+  serial: <`online`|`dateserial`|`unixtime`|any integer>
   skip: <comma-separated list of `empty`, `comment`>
 extensions:
   in: <extension on input file names>
@@ -208,6 +208,7 @@ Serial number modes are as follows:
   minimum SOA corresponds to what `date -u +%Y%m%d00` would return.
 - `dateserial`: Uses the `YYYYMMDD00` format
 - `unixtime` (default): Uses the current second since start of the epoch
+- An integer, e.g. `1`: Use this integer as the serial number
 
 ## Variables
 

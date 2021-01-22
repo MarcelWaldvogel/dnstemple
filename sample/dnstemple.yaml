@@ -1,5 +1,5 @@
 config:
-    serial:    unixtime
+    serial:    1
     skip:      empty,comment
 
 catalog:

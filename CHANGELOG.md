@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - `./dnstemple.py` to simplify testing the current version
 - Will output the domains which were changed, to simplify zone reloads
 - Option to skip outputting empty and/or comment lines (*starting* with `;`)
+- Allow a constant number as the serial number in `config.serial`
 
 ## Fixed
 
