@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Automatically maintain a catalog file
 - `./dnstemple.py` to simplify testing the current version
 - Will output the domains which were changed, to simplify zone reloads
+- Option to skip outputting empty and/or comment lines (*starting* with `;`)
 
 ## Fixed
 
@@ -17,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Default for serial number generation is now `unixtime`. Is much faster
   than `online`. Recommended for use with [Knot DNS](https://knot-dns.cz)
   option `zonefile-load: difference-no-serial`.
+- No more variable expansion in comment lines (referring to a changing variable
+  such as `_serial` in the comments no longer results in the file considered to
+  have changed)
+- Comment lines no longer reset the expectation for a label (to avoid wrong
+  assumptions, after e.g. `$INCLUDE`, a warning is issued, if the first
+  resource record does not have an explicit label)
 
 
 # 0.2.0 - 2021-01-21

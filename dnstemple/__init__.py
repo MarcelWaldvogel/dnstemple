@@ -138,9 +138,14 @@ def process(filename, config):
             elif line.startswith('$'):
                 output.append(line)
                 expect_name = True
+            elif line.startswith(';'):
+                # Do not warn and keep expectations
+                if 'comment' not in config['config']['skip']:
+                    output.append(line)
             elif line == '':
                 # Do not warn and keep expectations
-                output.append(line)
+                if 'empty' not in config['config']['skip']:
+                    output.append(line)
             else:
                 if expect_name and line[0] in ' \t':
                     print(f"WARNING: Line may have undefined name in {filename}: {line}")
@@ -181,6 +186,11 @@ def process_files(config, args):
     extout = config['extensions']['out']
     if extin == extout:
         exit("extensions.in and extensions.out need to differ")
+    # Speed up tests for `config.skip`
+    if 'config' not in config:
+        config['config'] = {}
+    if 'skip' not in config['config']:
+        config['config']['skip'] = ''
 
     domains = set()
     for filename in args:

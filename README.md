@@ -177,6 +177,7 @@ The configuration file is structured as follows:
 ```yaml
 config:
   serial: <increment|date|unixtime>
+  skip: <comma-separated list of `empty`, `comment`>
 extensions:
   in: <extension on input file names>
   out: <extension for output file names>
@@ -189,6 +190,9 @@ variables:
   <name2>: <value2>
   ...
 ```
+
+`skip` suppresses the output of empty and/or comment lines (*starting* with
+`;`).
 
 The `in` extension is removed from the input file names, if present, and the
 `out` extension is appended. The basename is also used to set the `_domain`

@@ -1,22 +1,23 @@
 config:
-    serial:  unixtime
+    serial:    unixtime
+    skip:      empty,comment
 
 catalog:
-    maintain: multiple-files
-    domain:  example.catalog
+    maintain:  multiple-files
+    domain:    example.catalog
 
 extensions:
-    in:      .IN
-    out:     .OUT
-    catalog: .zone
+    in:        .IN
+    out:       .OUT
+    catalog:   .zone
 
 addresses:
-    ns1:     203.0.113.53   2001:db8:1:2::53
-    ns2:     198.51.100.53  2001:db8:3:4::53
-    mail:    192.0.2.25     2001:db8:1234:5678::25
-    web:     192.0.2.80     2001:db8:1234:5678::80
-    cloud:   192.0.2.90     2001:db8:1234:5678::90
+    ns1:       203.0.113.53   2001:db8:1:2::53
+    ns2:       198.51.100.53  2001:db8:3:4::53
+    mail:      192.0.2.25     2001:db8:1234:5678::25
+    web:       192.0.2.80     2001:db8:1234:5678::80
+    cloud:     192.0.2.90     2001:db8:1234:5678::90
 
 variables:
-    ca:      letsencrypt.org
-    dkimkey: MII...
+    ca:        letsencrypt.org
+    dkimkey:   MII...
