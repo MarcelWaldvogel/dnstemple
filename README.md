@@ -94,15 +94,15 @@ could use `include:`, but many problems would still remain, such as:
 Create a central configuration where shared information is collected:
 ```yaml
 addresses:
-	ns1:	203.0.113.53	2001:db8:1:2::53
-	ns2:	198.51.100.53	2001:db8:3:4::53
-	mail:	192.0.2.25	2001:db8:1234:5678::25
-	web:	192.0.2.80	2001:db8:1234:5678::80
-	cloud:	192.0.2.90	2001:db8:1234:5678::90
+  ns1:     203.0.113.53  2001:db8:1:2::53
+  ns2:     198.51.100.53 2001:db8:3:4::53
+  mail:    192.0.2.25    2001:db8:1234:5678::25
+  web:     192.0.2.80    2001:db8:1234:5678::80
+  cloud:   192.0.2.90    2001:db8:1234:5678::90
 variables:
-	ca:	letsencrypt.org
-	dkimkey: |
-		"MII..."
+  ca:      letsencrypt.org
+  dkimkey: |
+  "MII..."
 ```
 
 Create a set of templates using `{variable}` references, `$ADDRESS` explosions
