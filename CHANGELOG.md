@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
+# 0.3.1 - 2021-01-30
+## Added
+
+## Fixed
+- `$DEFAULT` wrongly overwrote variables
+
+## Changed
+
+
 # 0.3.0 - 2021-01-22
 ## Added
 - Automatically maintain a catalog file

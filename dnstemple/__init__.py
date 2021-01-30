@@ -90,7 +90,7 @@ def expand_variables(filename, line, config):
 
 def expand_default(filename, line, config):
     (token, var, default) = line.split(maxsplit=2)
-    if var not in config['variables'] or config['variables'][var] != '':
+    if var not in config['variables'] or config['variables'][var] == '':
         config['variables'][var] = default
     return ''
 
