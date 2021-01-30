@@ -114,8 +114,9 @@ def expand_include(filename, line, config):
     args = line.split()
     if len(args) < 2:
         exit(f"Format mismatch `$ADDRESS <file> [<var>=<value>…]` in {filename}: {line}")
-    # Add arguments to copy of config
+    # Add arguments to copy of config variables (partial deep copy)
     config = dict(config)
+    config['variables'] = dict(config['variables'])
     for arg in args[2:]:
         (key, value) = arg.split('=')
         config['variables'][key] = value
@@ -153,8 +154,8 @@ def process(filename, config):
                     output.append(line)
             else:
                 if expect_name and line[0] in ' \t':
-                    sys.stderr.write(f"WARNING: Line may have undefined name"
-                        " in {filename}: {line}\n")
+                    sys.stderr.write("WARNING: Line may have undefined name"
+                        f" in {filename}: {line}\n")
                 output.append(line)
                 expect_name = False
     return output
