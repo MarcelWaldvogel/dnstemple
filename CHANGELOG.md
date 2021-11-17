@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
+# 0.3.2+ - [Unreleased]
+## Added
+- Automated integration tests
+
+## Fixed
+
+## Changed
+- Upgraded Python build/test system
+
 # 0.3.2 - 2021-01-30
 ## Added
 
