@@ -1,3 +1,5 @@
+![DNStemple logo](assets/dnstemple.svg)
+
 # DNS Temple • A DNS TEMPLating Engine
 
 Maintaining several domains ("zones") can be a hassle. Often, a lot of basic
