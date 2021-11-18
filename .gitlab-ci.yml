@@ -28,8 +28,8 @@ flake8:
 mypy:
   stage: lint
   script:
-    - pip3 install mypy importlib_metadata
-    - cd src && mypy -p dnstemple
+    - pip3 install tox
+    - tox -e mypy,system
 
 # unit
 unit:
