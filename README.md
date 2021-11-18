@@ -4,18 +4,19 @@
 
 Maintaining several domains ("zones") can be a hassle. Often, a lot of basic
 information is shared between domains (name, mail or web servers, anti-spam
-configuration etc.). `CNAME`s can help to keep information in a single
-location, but are not compatible e.g. with information stored at the apex (the
-domain name itelf), and thus are of limited or no use for the above-mentioned
-shared information. When creating a new zone, a previous zone can be copied;
-however, if later things have to change for these domains, a lot of manual
-labor is required, prone to errors. DNS Temple tries to simplify this.
+configuration etc.). `CNAME`s can help to keep information in a single location,
+but are not compatible e.g. with information stored at the apex (the domain name
+itelf), and thus are of limited or no use for the above-mentioned shared
+information. When creating a new zone, a previous zone can be copied; however,
+if later things have to change for these domains, a lot of manual labor is
+required, prone to errors. DNS Temple tries to simplify this.
 
 # Motivating example
 
 ## Traditional setup
 
 Main site:
+
 ```bind
 $ORIGIN		example.com.
 $TTL		86400
@@ -50,6 +51,7 @@ cloud		A	192.0.2.90
 ```
 
 One of many secondary sites:
+
 ```bind
 $ORIGIN		example.ch.
 $TTL		86400
@@ -76,24 +78,26 @@ dkim._domainkey	TXT	"v=DKIM1;k=rsa;t=s;s=email;p=MII..."
 _dmarc		TXT	"v=DMARC1; p=none; rua=mailto:dkim@example.com; fo=1:d:s"
 ```
 
-The `mail`, `_dkim`, and `www` entries could be changed to `CNAME`s and the SPF entry
-could use `include:`, but many problems would still remain, such as:
+The `mail`, `_dkim`, and `www` entries could be changed to `CNAME`s and the SPF
+entry could use `include:`, but many problems would still remain, such as:
 
-1. Changing the address of the web server would require changing all the files anyway.
+1. Changing the address of the web server would require changing all the files
+   anyway.
 1. Changing the list of name servers, certificate authorities, or mail servers
    cause modification of every file.
-1. `SOA` serials need to be incremented carefully to avoid hard-to-diagnose problems.
+1. `SOA` serials need to be incremented carefully to avoid hard-to-diagnose
+   problems.
 1. Adding an additional service, such as a secondary mail server, CardDAV,
    CalDAV, or XMPP would require touching every file.
-1. Over time, files will diverge, due to some services (such as cloud)
-   appearing in some zones only or authentication entries (such as
+1. Over time, files will diverge, due to some services (such as cloud) appearing
+   in some zones only or authentication entries (such as
    `google-site-verification`, maybe `_domainkey`) differing between domains.
 1. You will lose oversight because of all the clutter and differences.
-
 
 ## Configuration with DNS Temple
 
 Create a central configuration where shared information is collected:
+
 ```yaml
 addresses:
   ns1:     203.0.113.53  2001:db8:1:2::53
@@ -113,6 +117,7 @@ Create a set of templates using `{variable}` references, `$ADDRESS` explosions
 variables:
 
 - `header.t`:
+
 ```bind
 $ORIGIN		{_domain}
 $TTL		86400
@@ -123,6 +128,7 @@ $TTL		86400
 ```
 
 - `mail.t`:
+
 ```bind
 $DEFAULT			domain	{_domain}.
 $ADDRESS			mail	mail
@@ -138,19 +144,22 @@ _dmarc.{domain}			TXT	"v=DMARC1; p=none; rua=mailto:dkim@example.com; fo=1:d:s"
 ```
 
 - `web.t`:
+
 ```bind
 $ADDRESS	web	@
 $ADDRESS	web	www
 ```
 
 - `common.t`:
+
 ```bind
 $INCLUDE	header.t
 $INCLUDE	mail.t
 $INCLUDE	web.t
 ```
 
-These configuration templates will be shared among the zones, resulting in much more compact files:
+These configuration templates will be shared among the zones, resulting in much
+more compact files:
 
 ```bind
 $INCLUDE	common.t
@@ -171,11 +180,24 @@ $ADDRESS	cloud	cloud
 
 # Syntax
 
-The BIND syntax is augmented as follows:
+The BIND syntax is augmented to achieve the power of variables, modules, and
+functions. The changes, however, are minimal, to retain familiarity.
+
+Behind the scenes, _scoped variables_ and _include parameters_ do all the work:
+Each `$INCLUDE` creates a new context, initialized with the variables of the
+parent file and the parameters passed in the `$INCLUDE` statement.
+
+The new or extended statements are:
+
+- `$DEFAULT`: Setting default values for variables,
+- `$INCLUDE`: Create a child context and include the file, and
+- `$ADDRESS`: Simplify the handling of addresses, whether IPv4, IPv6 or groups
+  thereof.
 
 ## Configuration file
 
 The configuration file is structured as follows:
+
 ```yaml
 config:
   serial: <`online`|`dateserial`|`unixtime`|any integer>
@@ -193,7 +215,7 @@ variables:
   ...
 ```
 
-`skip` suppresses the output of empty and/or comment lines (*starting* with
+`skip` suppresses the output of empty and/or comment lines (_starting_ with
 `;`).
 
 The `in` extension is removed from the input file names, if present, and the
@@ -201,13 +223,14 @@ The `in` extension is removed from the input file names, if present, and the
 variable, below.
 
 Serial number modes are as follows:
-- `online`: Queries the name servers and increments; but uses at
-  least the value that `dateserial` would produce. For this, existing
-  `SOA` serials are obtained by querying the local resolver and an
-  authoritative name server. Highest priority for authoritative name server is
-  given to the *master name* (`MNAME`) extracted from the `SOA` record returned
-  by the local resolver, with the remaining `NS` entries as fallbacks. The
-  minimum SOA corresponds to what `date -u +%Y%m%d00` would return.
+
+- `online`: Queries the name servers and increments; but uses at least the value
+  that `dateserial` would produce. For this, existing `SOA` serials are obtained
+  by querying the local resolver and an authoritative name server. Highest
+  priority for authoritative name server is given to the _master name_ (`MNAME`)
+  extracted from the `SOA` record returned by the local resolver, with the
+  remaining `NS` entries as fallbacks. The minimum SOA corresponds to what
+  `date -u +%Y%m%d00` would return.
 - `dateserial`: Uses the `YYYYMMDD00` format
 - `unixtime` (default): Uses the current second since start of the epoch
 - An integer, e.g. `1`: Use this integer as the serial number
@@ -222,11 +245,11 @@ now).
 
 The following special variables are automatically set:
 
-* `_config`: The file name the YAML configuration has been read from.
-* `_domain`: The domain name, as determined by the basename of the top-level
+- `_config`: The file name the YAML configuration has been read from.
+- `_domain`: The domain name, as determined by the basename of the top-level
   file, i.e., the file specified on the command line, after removing the `in`
   extension.
-* `_serial`: A serial number usable for the `SOA` record.
+- `_serial`: A serial number usable for the `SOA` record.
 
 All variable names starting with `_` are reserved.
 
@@ -244,11 +267,11 @@ whitespace into variable values.
 
 ### `$ADDRESS <address> <prefix>`
 
-Create one line for each of the addresses listed for the named address
-parameter specified in the configuration file. Both IPv4 and IPv6 addresses can
-be mixed arbitrarily and will be prefixed with `A` or `AAAA`, as appropriate.
-Typically, the prefix will just be a name, but can also contain TTL
-information; in fact, anything that could precede the `A` or `AAAA`.
+Create one line for each of the addresses listed for the named address parameter
+specified in the configuration file. Both IPv4 and IPv6 addresses can be mixed
+arbitrarily and will be prefixed with `A` or `AAAA`, as appropriate. Typically,
+the prefix will just be a name, but can also contain TTL information; in fact,
+anything that could precede the `A` or `AAAA`.
 
 ### `$DEFAULT <variable> <value>`
 
