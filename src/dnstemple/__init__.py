@@ -4,6 +4,7 @@
 # substitution) from the configuration file and processes zone files, including
 # `$INCLUDE` support
 
+import argparse
 import ipaddress
 import sys
 import time
@@ -13,6 +14,15 @@ import dns.exception
 import dns.rdatatype
 import dns.resolver
 import yaml
+
+# For Python<3.8 instead of importlib.metadata
+from importlib_metadata import version, PackageNotFoundError
+
+try:
+    VERSION = version('fake_super')
+except PackageNotFoundError:
+    # package is not installed
+    VERSION = '[UNKNOWN]'
 
 
 def soa_serial_for_today():
@@ -113,7 +123,8 @@ def expand_address(filename, line, config):
 def expand_include(filename, line, config):
     args = line.split()
     if len(args) < 2:
-        exit(f"Format mismatch `$ADDRESS <file> [<var>=<value>…]` in {filename}: {line}")
+        exit(
+            f"Format mismatch `$ADDRESS <file> [<var>=<value>…]` in {filename}: {line}")
     # Add arguments to copy of config variables (partial deep copy)
     config = dict(config)
     config['variables'] = dict(config['variables'])
@@ -155,7 +166,7 @@ def process(filename, config):
             else:
                 if expect_name and line[0] in ' \t':
                     sys.stderr.write("WARNING: Line may have undefined name"
-                        f" in {filename}: {line}\n")
+                                     f" in {filename}: {line}\n")
                 output.append(line)
                 expect_name = False
     return output
@@ -269,14 +280,22 @@ def update_catalog(config, domains):
     return changed
 
 
-def main():
-    args = sys.argv[1:]
-    if len(args) > 1 and args[0] == '-c':
-        config = load_config(args[1])
-        args = args[2:]
-    else:
-        config = load_config('dnstemple.yaml')
-    (domains, mod_domains) = process_files(config, args)
+def main(sysargv=sys.argv[1:]):
+    parser = argparse.ArgumentParser(
+        description="""Simple yet powerful DNS TEMPlating Engine""")
+    parser.add_argument('--version',
+                        action='version',
+                        version=VERSION)
+    parser.add_argument('--config', '-c',
+                        default='dnstemple.yaml',
+                        help="The configurion file to use")
+    parser.add_argument('files',
+                        nargs='+',
+                        help="List of template files")
+    args = parser.parse_args(sysargv)
+
+    config = load_config('dnstemple.yaml')
+    (domains, mod_domains) = process_files(config, args.files)
     if 'catalog' in config:
         if len(domains) > 1 or ('maintain' in config['catalog']
                                 and config['catalog']['maintain'] == 'always'):
