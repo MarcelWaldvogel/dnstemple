@@ -13,6 +13,6 @@ pypi:	distribution-package test
 
 test:	tests
 tests:
-	${MAKE} -c sample test
+	${MAKE} -C sample test
 
 .PHONY: python-package distribution-package pypi tests test
