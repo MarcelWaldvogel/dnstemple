@@ -4,8 +4,8 @@ python-package:
 # With additional README (ugly hack; better solutions out there?)
 distribution-package:	python-package
 	${RM} -rf dist/* build/*
-	mkdir -p build/lib/fake_super
-	cp README.md build/lib/fake_super/
+	mkdir -p build/lib/dnstemple
+	cp README.md build/lib/dnstemple/
 	python3 -m build
 
 pypi:	distribution-package test
