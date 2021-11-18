@@ -123,8 +123,8 @@ def expand_address(filename, line, config):
 def expand_include(filename, line, config):
     args = line.split()
     if len(args) < 2:
-        exit(
-            f"Format mismatch `$ADDRESS <file> [<var>=<value>…]` in {filename}: {line}")
+        exit("Format mismatch `$ADDRESS <file> [<var>=<value>…]`"
+             f" in {filename}: {line}")
     # Add arguments to copy of config variables (partial deep copy)
     config = dict(config)
     config['variables'] = dict(config['variables'])
@@ -227,7 +227,8 @@ def process_files(config, args):
         except KeyError:
             serial_mode = None
         config['variables']['_serial'] = get_serial(domain, serial_mode)
-        if write_if_changed(domain + extout, '\n'.join(process(filename, config)) + '\n'):
+        if write_if_changed(domain + extout,
+                            '\n'.join(process(filename, config)) + '\n'):
             mod_domains.add(domain)
     return (domains, mod_domains)
 

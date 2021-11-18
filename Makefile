@@ -13,6 +13,8 @@ pypi:	distribution-package test
 
 test:	tests
 tests:
+	flake8
+	cd src && mypy -p dnstemple
 	${MAKE} -C sample test
 
 .PHONY: python-package distribution-package pypi tests test

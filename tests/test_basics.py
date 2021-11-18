@@ -1,5 +1,4 @@
-from mock import patch, call
-import time
+from mock import patch
 
 import dnstemple
 

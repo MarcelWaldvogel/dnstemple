@@ -1,6 +1,4 @@
-from mock import patch, call, mock_open
-
-import dnstemple
+from mock import patch, mock_open
 
 
 @patch('builtins.open', new_callable=mock_open, read_data='../some/path')
