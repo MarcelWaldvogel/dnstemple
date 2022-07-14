@@ -87,8 +87,9 @@ def test_expand_too_deep():
 
 def test_expand_invalid():
     with raises(ValueError,
-                match=re.escape(r'Address "fails" unknown when expanding "z"'
-                                ' (expanded from address "y" (expanded from address "x"))')):
+                match=re.escape(r'Address "fails" unknown expanding "z"'
+                                ' (expanded from address "y"'
+                                ' (expanded from address "x"))')):
         dnstemple.expand_address(
             "a.zone", '$ADDRESS\tx\t@',
             {

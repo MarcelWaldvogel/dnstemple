@@ -132,10 +132,11 @@ def expand_address(filename, line, config, expanded_from="", depth=1):
             try:
                 output.extend(expand_address(
                     filename, f"{token} {a} {prefix}", config,
-                    f' (expanded from address "{addr}"{expanded_from})', depth + 1))
+                    f' (expanded from address "{addr}"{expanded_from})',
+                    depth + 1))
             except KeyError:
                 raise ValueError(
-                    f'Address "{a}" unknown when expanding "{addr}"{expanded_from}'
+                    f'Address "{a}" unknown expanding "{addr}"{expanded_from}'
                 )
     return output
 
