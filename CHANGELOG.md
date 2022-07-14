@@ -9,11 +9,14 @@ project adheres to [Semantic Versioning](https://semver.org/).
 
 ## Added
 
+- Support variable expansion in addresses
+- Support recursive address definitions (up to 5 levels deep for now)
+
 ## Fixed
+
 - Reported wrong version
 
 ## Changed
-
 
 # 1.0.0 - 2021-11-18
 

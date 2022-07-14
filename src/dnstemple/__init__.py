@@ -91,11 +91,16 @@ def get_serial(domain, mode):
             exit(f"Unknown value for config.serial: {mode}")
 
 
-def expand_variables(filename, line, config):
+def expand_variables(filename, line, config,
+                     expanded_from="", whole_line=None):
+    if whole_line is None:
+        whole_line = line
     try:
         return line.format_map(config['variables'])
     except KeyError as k:
-        exit(f"Unknown variable {k} in {filename}: {line}")
+        exit(
+            f'Unknown variable {k} in {filename}: "{whole_line}"'
+            '{expanded_from}')
 
 
 def expand_default(filename, line, config):
@@ -105,18 +110,33 @@ def expand_default(filename, line, config):
     return ''
 
 
-def expand_address(filename, line, config):
+def expand_address(filename, line, config, expanded_from="", depth=1):
     (token, addr, prefix) = line.split(maxsplit=2)
     # KeyError caught in caller
-    addresses = config['addresses'][addr]
+    addresses = expand_variables(
+        filename, config['addresses'][addr], config,
+        f' (expanded from address "{addr}"{expanded_from})', line)
     output = []
     for a in addresses.split():
-        ipa = ipaddress.ip_address(a)
-        doubletab = '\t' if len(prefix) < 8 else ''
-        if isinstance(ipa, ipaddress.IPv4Address):
-            output.append(f'{prefix}{doubletab}\tA\t{a}')
-        else:
-            output.append(f'{prefix}{doubletab}\tAAAA\t{a}')
+        try:
+            ipa = ipaddress.ip_address(a)
+            doubletab = '\t' if len(prefix) < 8 else ''
+            if isinstance(ipa, ipaddress.IPv4Address):
+                output.append(f'{prefix}{doubletab}\tA\t{a}')
+            else:
+                output.append(f'{prefix}{doubletab}\tAAAA\t{a}')
+        except ValueError:
+            if depth > 5:
+                raise RecursionError(
+                    f"Address expansion too deep (>5){expanded_from}")
+            try:
+                output.extend(expand_address(
+                    filename, f"{token} {a} {prefix}", config,
+                    f' (expanded from address "{addr}"{expanded_from})', depth + 1))
+            except KeyError:
+                raise ValueError(
+                    f'Address "{a}" unknown when expanding "{addr}"{expanded_from}'
+                )
     return output
 
 

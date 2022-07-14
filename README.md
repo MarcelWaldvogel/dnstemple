@@ -253,6 +253,41 @@ The following special variables are automatically set:
 
 All variable names starting with `_` are reserved.
 
+## Addresses
+
+One of the important reasons for using `dnstemple` is to make addressing more
+dynamic. This is similar to a variable, but with extra possibilities:
+
+- Be able to change addresses in multiple zone files, even if `CNAME`s are not
+  possible (e.g., at the apex)
+- Reduce inter-zone dependencies: Have the same address in multiple zones,
+  without causing multiple lookups (i.e., follow the `CNAME`) when resolving or
+  requiring the other zone to be ready.
+- Handle IPv4 and IPv6 addresses using the same syntax (no deciding between `A`
+  and `AAAA`)
+- Support multiple addresses for a name (IPv4+IPv6, but also multiple of each)
+  without having to add/drop lines in the zone file
+
+Addresses are defined similar to variables, but with the following distinctions:
+
+- They are defined in the `address` block
+- They are used with the `$ADDRESS` directive, which expands them into any
+  number of `A` and `AAAA` records, as appropriate
+- They can be defined recursively, e.g. for fail-over/load-balancing setups:
+
+  ```yaml
+  addresses:
+    server1: 192.0.2.11 2001:db8:1234:5678::11
+    server2: 192.0.2.12
+    farm: server1 server2
+  ```
+
+  There is no need to use variable notation. Anything not an IPv4 or IPv6
+  address will be recursively looked up as an address, up to 5 levels deep.
+
+  Of course, variables could also be included using the standard `{}` variable
+  notation, but then the reference is to the `variables` section.
+
 ## Directives
 
 ### `$INCLUDE <file> [<var>=<value>…]`
