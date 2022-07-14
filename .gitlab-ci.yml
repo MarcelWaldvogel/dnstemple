@@ -39,8 +39,11 @@ unit:
     - pip3 install tox
     - tox -e py39
   artifacts:
+    expire_in: 2 days
     reports:
-      cobertura: coverage.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
 
 # versions (now in test)
 py36:
