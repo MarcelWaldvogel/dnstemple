@@ -19,7 +19,7 @@ import yaml
 from importlib_metadata import version, PackageNotFoundError
 
 try:
-    VERSION = version('fake_super')
+    VERSION = version('dnstemple')
 except PackageNotFoundError:
     # package is not installed
     VERSION = '[UNKNOWN]'
